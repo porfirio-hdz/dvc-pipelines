@@ -79,3 +79,161 @@ if __name__ == '__main__':
     data_load(config_path=args.config)
 
 ```
+
+We will create a Python script called data_prepare.py and save it in a new stages folder under the src folder.
+
+- At this moment we can run a ```dvc status``` command. This will tell us that there is no pipeline tracked in the project yet.
+
+Once we have our script, we can create a DVC stage with the following command:
+
+```bash
+dvc stage add -n data_prepare \
+    -d src/stages/data_prepare.py \
+    -o data/processed/prepare_penguins.csv \
+    -p base,data_load \
+    python -m src.stages.data_prepare --config=params.yaml
+```
+
+Notice that after running the command above, a ```dvc.yaml``` file was created. You can also check this by running a ```git status```.
+
+To test our first pipeline stage we can run the commando below:
+
+```dvc repro```
+
+If the pipeline runs correctly you should see a new file created named ```dvc.lock```. This is a state file that DVC creates to capture the pipeline's reproduction results.
+- Do not manually modify this file.
+
+Now you can run ```dvc dag``` and see a simple diagram of your first pipeline stage.
+
+![dag_first_stage](/img/dag_data_prepare.png)
+
+> After having a succesful stage execution it is a good practice to commit our changes with git.
+
+### Create the other pipeline's stages
+
+DVC has two ways of creating pipeline stages. The first is the one we did before using the ```dvc stage add``` command. Remember that after running this command for the first time, DVC creates a dvc.yaml file that will contain the information of all the stages of our pipeline. 
+
+The second way to create a stage is by editing the ```dvc.yaml``` file. Although adding a stage with ```dvc stage add``` has the advantage that it will verify the validity of the arguments provided.
+
+So, to add the second stage (featurize processing) we need to create our Python script under the ```src/stages``` directory. We will name this script as ```featurize.py```
+
+
+```python
+import argparse
+import pandas as pd
+from typing import Text
+import yaml
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+from src.utils.logs import get_logger
+
+
+def renaming_fun(x):
+    if "remainder__" in x:
+        return x.strip('remainder__')
+    return x
+
+def featurize(config_path: Text) -> None:
+    """Create new features.
+    Args:
+        config_path {Text}: path to config
+    """
+
+    with open(config_path) as conf_file:
+        config = yaml.safe_load(conf_file)
+
+    logger = get_logger('FEATURIZE', log_level=config['base']['log_level'])
+
+    logger.info('Load raw data')
+    dataset = pd.read_csv(config['data_load']['dataset_prepare'])
+
+    # Drop columns
+    X = dataset.drop(['island', 'year'], axis=1)
+
+    logger.info('Extract features')
+    # Define categorical features
+    categorical_features = config['featurize']['categorical_features']
+
+    # Create a column transformer with one-hot encoding
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('cat', OneHotEncoder(), categorical_features)
+        ],
+        remainder='passthrough'
+    )
+
+    X_processed = preprocessor.fit_transform(X)
+    # Convert processed X array into dataframe
+    X_processed_df = pd.DataFrame(X_processed, columns=preprocessor.get_feature_names_out())
+
+    # Clean column names
+    X_processed_df.columns = [renaming_fun(col) for col in X_processed_df.columns]
+
+    logger.info('Save features')
+    features_path = config['featurize']['features_path']
+    X_processed_df.to_csv(features_path, index=False)
+
+
+if __name__ == '__main__':
+
+    args_parser = argparse.ArgumentParser()
+    args_parser.add_argument('--config', dest='config', required=True)
+    args = args_parser.parse_args()
+
+    featurize(config_path=args.config)
+```
+
+Once the script is under the ```src/stages``` directory, we can add the code below to our ```dvc.yaml``` file (Be aware of proper indentation):
+
+```yaml
+  featurize:
+    cmd: python -m src.stages.featurize --config=params.yaml
+    deps:
+    - data/processed/prepare_penguins.csv
+    - src/stages/featurize.py
+    params:
+    - base
+    - data_load
+    - featurize
+    outs:
+    - data/processed/featured_penguins.csv
+```
+
+- Notice that the output (prepare_penguins.csv) of the data_prepare stage is the input of the featurize stage.
+
+So far your dvc.yaml file should look like this:
+
+```yaml
+stages:
+  data_prepare:
+    cmd: python -m src.stages.data_prepare --config=params.yaml
+    deps:
+    - src/stages/data_prepare.py
+    params:
+    - base
+    - data_load
+    outs:
+    - data/processed/prepare_penguins.csv
+  featurize:
+    cmd: python -m src.stages.featurize --config=params.yaml
+    deps:
+    - data/processed/prepare_penguins.csv
+    - src/stages/featurize.py
+    params:
+    - base
+    - data_load
+    - featurize
+    outs:
+    - data/processed/featured_penguins.csv
+```
+
+We can execute our pipeline again with ```dvc repro```.
+
+Notice again that the ```dvc.lock``` has been modified with the new information from the featurize stage.
+
+And again you can check your current pipeline with ```dvc dag```.
+
+![dvc_dag_2](/img/dvc_dag_2.png)
+
+> Once again it is a good practice to commit our changes.

@@ -1,0 +1,51 @@
+schema: '2.0'
+stages:
+  data_prepare:
+    cmd: python -m src.stages.data_prepare --config=params.yaml
+    deps:
+    - path: src/stages/data_prepare.py
+      hash: md5
+      md5: bec03d8de298706ed515933c05bad048
+      size: 942
+    params:
+      params.yaml:
+        base:
+          random_state: 42
+          log_level: INFO
+        data_load:
+          dataset_csv: data/raw/penguins.csv
+          dataset_prepare: data/processed/prepare_penguins.csv
+    outs:
+    - path: data/processed/prepare_penguins.csv
+      hash: md5
+      md5: 320d99d6d2de20f16f67340a1e89e075
+      size: 16286
+  featurize:
+    cmd: python -m src.stages.featurize --config=params.yaml
+    deps:
+    - path: data/processed/prepare_penguins.csv
+      hash: md5
+      md5: 320d99d6d2de20f16f67340a1e89e075
+      size: 16286
+    - path: src/stages/featurize.py
+      hash: md5
+      md5: 80ccf64f9691437e426196d5a6d883c2
+      size: 1801
+    params:
+      params.yaml:
+        base:
+          random_state: 42
+          log_level: INFO
+        data_load:
+          dataset_csv: data/raw/penguins.csv
+          dataset_prepare: data/processed/prepare_penguins.csv
+        featurize:
+          features_path: data/processed/featured_penguins.csv
+          target_column: species
+          categorical_features:
+          - sex
+    outs:
+    - path: data/processed/featured_penguins.csv
+      hash: md5
+      md5: 562cf4987f5780b7cba959440719757e
+      size: 12946
