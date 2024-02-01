@@ -1,6 +1,6 @@
 # dvc-pipelines
  
-This repo is intented to instruct how build machine learning pipeline with DVC. The main goal of the repo is to transition from working in a Jupyter notebook to a more modular workflow.
+This repo is intended to instruct how to build a machine-learning pipeline with DVC. The main goal of the repo is to transition from working in a Jupyter notebook to a more modular workflow.
 
 As a first step, it is **recommended** to create a virtual environment with a tool such as
 [virtualenv](https://virtualenv.pypa.io/en/stable/):
@@ -11,7 +11,7 @@ $ source .venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-The step above will ensure we have the right versions of [DVC](https://dvc.org/) and [DVCLive](https://dvc.org/doc/dvclive).
+The step above will ensure we have the correct versions of [DVC](https://dvc.org/) and [DVCLive](https://dvc.org/doc/dvclive).
 
 ### Initialize the repo with DVC init
 
@@ -21,7 +21,7 @@ It is recommended to commit the changes to git before continuing.
 
 ### Create the first pipeline stage with DVC
 
-The jupyter notebook is divided into different sections or steps which we will use to build each stage of the pipeline. Notice for example, that the first section is the Data Prepare part. So this will be our first pipeline stage.
+The jupyter notebook is divided into different sections or steps, which we will use to build each pipeline stage. For example, the first section is the Data Prepare part. So, this will be our first pipeline stage.
 
 So we will take this code cell below:
 
@@ -37,7 +37,8 @@ df = df.dropna(axis=0, how='any')
 df = df.drop('Unnamed: 0', axis=1)
 ```
 
-and transform it into a python script like this:
+And transform it into a Python script like this:
+
 ```python
 import argparse
 import pandas as pd
@@ -82,7 +83,7 @@ if __name__ == '__main__':
 
 We will create a Python script called data_prepare.py and save it in a new stages folder under the src folder.
 
-- At this moment we can run a ```dvc status``` command. This will tell us that there is no pipeline tracked in the project yet.
+- We can now run a ```dvc status``` command. This will tell us that no pipeline is tracked in the project yet.
 
 Once we have our script, we can create a DVC stage with the following command:
 
@@ -94,28 +95,28 @@ dvc stage add -n data_prepare \
     python -m src.stages.data_prepare --config=params.yaml
 ```
 
-Notice that after running the command above, a ```dvc.yaml``` file was created. You can also check this by running a ```git status```.
+After running the command above, a ```dvc.yaml``` file was created. You can also check this by running a ```git status```.
 
-To test our first pipeline stage we can run the commando below:
+To test our first pipeline stage, we can run the commando below:
 
 ```dvc repro```
 
-If the pipeline runs correctly you should see a new file created named ```dvc.lock```. This is a state file that DVC creates to capture the pipeline's reproduction results.
+If the pipeline runs correctly, you should see a new file created named ```dvc.lock```. This is a state file that DVC creates to capture the pipeline's reproduction results.
 - Do not manually modify this file.
 
 Now you can run ```dvc dag``` and see a simple diagram of your first pipeline stage.
 
 ![dag_first_stage](/img/dag_data_prepare.png)
 
-> After having a succesful stage execution it is a good practice to commit our changes with git.
+> After having a successful stage execution, it is a good practice to commit our changes with Git.
 
 ### Create the other pipeline's stages
 
 DVC has two ways of creating pipeline stages. The first is the one we did before using the ```dvc stage add``` command. Remember that after running this command for the first time, DVC creates a dvc.yaml file that will contain the information of all the stages of our pipeline. 
 
-The second way to create a stage is by editing the ```dvc.yaml``` file. Although adding a stage with ```dvc stage add``` has the advantage that it will verify the validity of the arguments provided.
+The second way to create a stage is by editing the ```dvc.yaml``` file. However, adding a stage with ```dvc stage add``` has the advantage that it will verify the validity of the arguments provided.
 
-So, to add the second stage (featurize processing) we need to create our Python script under the ```src/stages``` directory. We will name this script as ```featurize.py```
+So, to add the second stage (feature processing), we need to create our Python script under the ```src/stages``` directory. We will name this script as ```featurize.py```
 
 
 ```python
@@ -202,7 +203,7 @@ Once the script is under the ```src/stages``` directory, we can add the code bel
 
 - Notice that the output (prepare_penguins.csv) of the data_prepare stage is the input of the featurize stage.
 
-So far your dvc.yaml file should look like this:
+So far, your dvc.yaml file should look like this:
 
 ```yaml
 stages:
@@ -232,8 +233,10 @@ We can execute our pipeline again with ```dvc repro```.
 
 Notice again that the ```dvc.lock``` has been modified with the new information from the featurize stage.
 
-And again you can check your current pipeline with ```dvc dag```.
+And again, you can check your current pipeline with ```dvc dag```.
 
 ![dvc_dag_2](/img/dvc_dag_2.png)
 
-> Once again it is a good practice to commit our changes.
+> Once again, it is a good practice to commit to our changes.
+
+#### Building the remaining stages
