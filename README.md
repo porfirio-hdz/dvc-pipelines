@@ -21,9 +21,9 @@ It is recommended to commit the changes to git before continuing.
 
 ### Create the first pipeline stage with DVC
 
-The jupyter notebook is divided into different sections or steps, which we will use to build each pipeline stage. For example, the first section is the Data Prepare part. So, this will be our first pipeline stage.
+The ```simple_ml_workflow.ipynb``` jupyter notebook located in the ```notebooks``` folder is divided into different sections or steps, which we will use to build each pipeline stage. For example, the first section is the **Data Prepare** part. So, this will be our first pipeline stage.
 
-So we will take this code cell below:
+So we will take the code cell below:
 
 ```python
 # Load the Penguins dataset
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 
 ```
 
-We will create a Python script called data_prepare.py and save it in a new stages folder under the src folder.
+Using the code above, we will create a Python script called ```data_prepare.py``` and save it in a new stages folder under the src folder.
 
 - We can now run a ```dvc status``` command. This will tell us that no pipeline is tracked in the project yet.
 
@@ -95,7 +95,7 @@ dvc stage add -n data_prepare \
     python -m src.stages.data_prepare --config=params.yaml
 ```
 
-After running the command above, a ```dvc.yaml``` file was created. You can also check this by running a ```git status```.
+After running the command above, a ```dvc.yaml``` file is created. You can also check this by running a ```git status```.
 
 To test our first pipeline stage, we can run the commando below:
 
@@ -104,7 +104,7 @@ To test our first pipeline stage, we can run the commando below:
 If the pipeline runs correctly, you should see a new file created named ```dvc.lock```. This is a state file that DVC creates to capture the pipeline's reproduction results.
 - Do not manually modify this file.
 
-Now you can run ```dvc dag``` and see a simple diagram of your first pipeline stage.
+Now you can run ```dvc dag``` and see a simple diagram of your first pipeline stage:
 
 ![dag_first_stage](/img/dag_data_prepare.png)
 
@@ -112,9 +112,11 @@ Now you can run ```dvc dag``` and see a simple diagram of your first pipeline st
 
 ### Create the other pipeline's stages
 
-DVC has two ways of creating pipeline stages. The first is the one we did before using the ```dvc stage add``` command. Remember that after running this command for the first time, DVC creates a dvc.yaml file that will contain the information of all the stages of our pipeline. 
+DVC has two ways of creating pipeline stages. The first is the one we did before using the ```dvc stage add``` command. Remember that after running this command for the first time, DVC creates a ```dvc.yaml``` file that will contain the information of all the stages of our pipeline. 
 
-The second way to create a stage is by editing the ```dvc.yaml``` file. However, adding a stage with ```dvc stage add``` has the advantage that it will verify the validity of the arguments provided.
+The second way to create a stage is by editing the ```dvc.yaml``` file.
+
+> However, adding a stage with ```dvc stage add``` has the advantage that it will verify the validity of the arguments provided.
 
 So, to add the second stage (feature processing), we need to create our Python script under the ```src/stages``` directory. We will name this script as ```featurize.py```
 
@@ -201,7 +203,7 @@ Once the script is under the ```src/stages``` directory, we can add the code bel
     - data/processed/featured_penguins.csv
 ```
 
-- Notice that the output (prepare_penguins.csv) of the data_prepare stage is the input of the featurize stage.
+> Notice that the output (prepare_penguins.csv) of the data_prepare stage is the input of the featurize stage.
 
 So far, your dvc.yaml file should look like this:
 
@@ -240,3 +242,18 @@ And again, you can check your current pipeline with ```dvc dag```.
 > Once again, it is a good practice to commit to our changes.
 
 #### Building the remaining stages
+
+The procedure to build the remaining pipeline stages is similar. We just have to be aware of setting the correct dependencies to build the DAG.
+
+For example to build the next step (data_split) the dvc command is the following:
+
+```dvc stage add -n data_split \
+    -d src/stages/data_split.py -d data/processed/featured_penguins.csv \
+    -o data/processed/train_penguins.csv -o data/processed/test_penguins.csv \
+    -p base,data_load,featurize \
+    python -m src.stages.data_split --config=params.yaml
+```
+
+The rest of the stages are left as an exercise. You can download the remaining Python scripts from this link.
+
+ For a completed solution you can refer to this **repo**.
