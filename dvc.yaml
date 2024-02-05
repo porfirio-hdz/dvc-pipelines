@@ -33,3 +33,24 @@ stages:
     outs:
     - data/processed/test_penguins.csv
     - data/processed/train_penguins.csv
+
+  train:
+    cmd: python -m src.stages.train --config=params.yaml
+    deps:
+    - data/processed/train_penguins.csv
+    - src/stages/train.py
+    outs:
+    - models/model.joblib
+    params:
+    - base
+    - data_split.trainset_path
+    - featurize.target_column
+    - train
+artifacts:
+  penguins_classifier:
+    path: models/model.joblib
+    type: model
+    desc: This is a penguins classifier.
+    labels:
+    - cv
+    - classification

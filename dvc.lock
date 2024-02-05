@@ -86,3 +86,56 @@ stages:
       hash: md5
       md5: 8a664ee1af061e4c54bc1acd0a34f013
       size: 10346
+  train:
+    cmd: python -m src.stages.train --config=params.yaml
+    deps:
+    - path: data/processed/train_penguins.csv
+      hash: md5
+      md5: 8a664ee1af061e4c54bc1acd0a34f013
+      size: 10346
+    - path: src/stages/train.py
+      hash: md5
+      md5: b53de68c9440d7260420b7d6ee9db4a7
+      size: 1788
+    params:
+      params.yaml:
+        base:
+          random_state: 42
+          log_level: INFO
+        data_split.trainset_path: data/processed/train_penguins.csv
+        featurize.target_column: species
+        train:
+          cv: 3
+          estimator_name: rdm_forest
+          estimators:
+            logreg:
+              param_grid:
+                C:
+                - 0.005
+                max_iter:
+                - 100
+                solver:
+                - lbfgs
+                multi_class:
+                - multinomial
+            svm:
+              param_grid:
+                C:
+                - 0.1
+                - 1.0
+                kernel:
+                - rbf
+                - linear
+                gamma:
+                - scale
+                degree:
+                - 3
+                - 5
+            rdm_forest:
+              param_grid:
+          model_path: models/model.joblib
+    outs:
+    - path: models/model.joblib
+      hash: md5
+      md5: a8ee968217d959daddae28e15a00eb6b
+      size: 306833
