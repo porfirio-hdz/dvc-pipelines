@@ -19,4 +19,17 @@ stages:
     - featurize
     outs:
     - data/processed/featured_penguins.csv
-  
+
+  data_split:
+    cmd: python -m src.stages.data_split --config=params.yaml
+    deps:
+    - data/processed/featured_penguins.csv
+    - src/stages/data_split.py
+    params:
+    - base
+    - data_load
+    - featurize
+    - data_split
+    outs:
+    - data/processed/test_penguins.csv
+    - data/processed/train_penguins.csv

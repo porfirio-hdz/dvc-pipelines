@@ -49,3 +49,40 @@ stages:
       hash: md5
       md5: 562cf4987f5780b7cba959440719757e
       size: 12946
+  data_split:
+    cmd: python -m src.stages.data_split --config=params.yaml
+    deps:
+    - path: data/processed/featured_penguins.csv
+      hash: md5
+      md5: 562cf4987f5780b7cba959440719757e
+      size: 12946
+    - path: src/stages/data_split.py
+      hash: md5
+      md5: 8dfe312ff90160af2ff57f15ac8cb829
+      size: 1298
+    params:
+      params.yaml:
+        base:
+          random_state: 42
+          log_level: INFO
+        data_load:
+          dataset_csv: data/raw/penguins.csv
+          dataset_prepare: data/processed/prepare_penguins.csv
+        data_split:
+          test_size: 0.2
+          trainset_path: data/processed/train_penguins.csv
+          testset_path: data/processed/test_penguins.csv
+        featurize:
+          features_path: data/processed/featured_penguins.csv
+          target_column: species
+          categorical_features:
+          - sex
+    outs:
+    - path: data/processed/test_penguins.csv
+      hash: md5
+      md5: 1a3b22fda4b559b76792c6844b4cbf1f
+      size: 2688
+    - path: data/processed/train_penguins.csv
+      hash: md5
+      md5: 8a664ee1af061e4c54bc1acd0a34f013
+      size: 10346

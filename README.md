@@ -247,10 +247,11 @@ The procedure to build the remaining pipeline stages is similar. We just have to
 
 For example to build the next step (data_split) the dvc command is the following:
 
-```dvc stage add -n data_split \
+```bash
+dvc stage add -n data_split \
     -d src/stages/data_split.py -d data/processed/featured_penguins.csv \
     -o data/processed/train_penguins.csv -o data/processed/test_penguins.csv \
-    -p base,data_load,featurize \
+    -p base,data_load,featurize,data_split \
     python -m src.stages.data_split --config=params.yaml
 ```
 
