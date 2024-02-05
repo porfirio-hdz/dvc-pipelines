@@ -72,9 +72,6 @@ artifacts:
     labels:
     - cv
     - classification
-  model:
-    path: models/model.joblib
-    type: model
 metrics:
 - dvclive/metrics.json
 plots:
