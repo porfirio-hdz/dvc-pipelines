@@ -139,3 +139,34 @@ stages:
       hash: md5
       md5: a8ee968217d959daddae28e15a00eb6b
       size: 306833
+  evaluate:
+    cmd: python -m src.stages.evaluate --config=params.yaml
+    deps:
+    - path: data/processed/test_penguins.csv
+      hash: md5
+      md5: 1a3b22fda4b559b76792c6844b4cbf1f
+      size: 2688
+    - path: models/model.joblib
+      hash: md5
+      md5: a8ee968217d959daddae28e15a00eb6b
+      size: 306833
+    - path: src/stages/evaluate.py
+      hash: md5
+      md5: 2296ceb7ae340454f5b6e2416cb1f217
+      size: 2038
+    params:
+      params.yaml:
+        base:
+          random_state: 42
+          log_level: INFO
+        data_split.testset_path: data/processed/test_penguins.csv
+        evaluate:
+          reports_dir: reports
+          metrics_file: metrics.json
+          confusion_matrix_image: confusion_matrix.png
+        featurize.target_column: species
+    outs:
+    - path: reports/metrics.json
+      hash: md5
+      md5: 3329ba1a6b18407f725a1e25a5500560
+      size: 17
