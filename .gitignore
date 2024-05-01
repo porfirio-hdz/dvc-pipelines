@@ -6,8 +6,8 @@
 .DS_Store
 
 # Project
-data/*
-models/*
+data/processed/*
+models/model.joblib
 
 # Python
 __pycache__
