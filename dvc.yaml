@@ -72,6 +72,9 @@ artifacts:
     labels:
     - cv
     - classification
+  penguins-demo-live:
+    path: models/model.joblib
+    type: model
 metrics:
 - dvclive/metrics.json
 plots:
